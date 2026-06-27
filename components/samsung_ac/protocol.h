@@ -117,6 +117,7 @@ namespace esphome
             optional<float> target_water_temp;
             optional<FanMode> fan_mode;
             optional<SwingMode> swing_mode;
+            optional<uint8_t> blade_swing_mask;
             optional<AltMode> alt_mode;
         };
 
