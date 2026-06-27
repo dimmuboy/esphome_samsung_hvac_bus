@@ -90,6 +90,7 @@ CONF_DEVICE_OUT_CONTROL_WATTMETER_ALL_UNIT_ACCUM = "outdoor_instantaneous_power"
 CONF_DEVICE_OUT_CONTROL_WATTMETER_1W_1MIN_SUM = "outdoor_cumulative_energy"
 CONF_DEVICE_OUT_SENSOR_CT1 = "outdoor_current"
 CONF_DEVICE_OUT_SENSOR_VOLTAGE = "outdoor_voltage"
+CONF_DEVICE_BLADE_SWING_MASK = "blade_swing_mask"
 CONF_MAP_AUTO_TO_HEAT_COOL = "map_auto_to_heat_cool"
 CONF_DEBUG_LOG_MESSAGES_ON_CHANGE = "debug_log_messages_on_change"
 CONF_NON_NASA_TX_DELAY_MS = "non_nasa_tx_delay_ms"
@@ -253,6 +254,7 @@ DEVICE_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_DEVICE_ERROR_CODE): error_code_sensor_schema(0x8235),
         cv.Optional(CONF_DEVICE_TARGET_TEMPERATURE): NUMBER_SCHEMA,
+        cv.Optional(CONF_DEVICE_BLADE_SWING_MASK): NUMBER_SCHEMA,
         cv.Optional(CONF_DEVICE_WATER_OUTLET_TARGET): NUMBER_SCHEMA,
         cv.Optional(CONF_DEVICE_WATER_TARGET_TEMPERATURE): NUMBER_SCHEMA,
         cv.Optional(CONF_DEVICE_POWER): switch.switch_schema(
@@ -547,6 +549,13 @@ async def to_code(config):
                 conf, min_value=16.0, max_value=30.0, step=1.0
             )
             cg.add(var_dev.set_target_temperature_number(num))
+
+        if CONF_DEVICE_BLADE_SWING_MASK in device:
+            conf = device[CONF_DEVICE_BLADE_SWING_MASK]
+            num = await number.new_number(
+                conf, min_value=0.0, max_value=15.0, step=1.0
+            )
+            cg.add(var_dev.set_blade_swing_mask_number(num))
 
         if CONF_DEVICE_WATER_OUTLET_TARGET in device:
             conf = device[CONF_DEVICE_WATER_OUTLET_TARGET]
