@@ -589,6 +589,13 @@ namespace esphome
                     packet.messages.push_back(lr_swing);
                 }
 
+                if (request.blade_swing_mask)
+                {
+                  MessageSet blade_swing_mask(MessageNumber::ENUM_in_louver_hl_part_swing);
+                  blade_swing_mask.value = request.blade_swing_mask.value() & 0x0F;
+                  packet.messages.push_back(blade_swing_mask);
+                }
+
                 if (packet.messages.size() == 0)
                     continue;
 
@@ -641,6 +648,9 @@ namespace esphome
 
             if (request.swing_mode)
                 queued.swing_mode = request.swing_mode;
+
+            if (request.blade_swing_mask)
+              queued.blade_swing_mask = request.blade_swing_mask;
         }
 
         Mode operation_mode_to_mode(int value)
