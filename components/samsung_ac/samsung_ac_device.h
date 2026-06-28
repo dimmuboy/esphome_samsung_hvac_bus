@@ -137,11 +137,17 @@ namespace esphome
       Samsung_AC_Switch *power{nullptr};
       Samsung_AC_Switch *automatic_cleaning{nullptr};
       Samsung_AC_Switch *water_heater_power{nullptr};
+      Samsung_AC_Switch *blade_swing_door{nullptr};
+      Samsung_AC_Switch *blade_swing_kitchen{nullptr};
+      Samsung_AC_Switch *blade_swing_hallway{nullptr};
+      Samsung_AC_Switch *blade_swing_livingroom{nullptr};
       Samsung_AC_Mode_Select *mode{nullptr};
       Samsung_AC_Water_Heater_Mode_Select *waterheatermode{nullptr};
       Samsung_AC_Climate *climate{nullptr};
       std::map<uint16_t, sensor::Sensor *> custom_sensor_map;
       float room_temperature_offset{0};
+      uint8_t blade_swing_mask_state{0};
+      bool blade_swing_mask_state_known{false};
 
       template <typename SwingType>
       void update_swing(SwingType &swing_variable, uint8_t mask, bool value)
@@ -300,6 +306,86 @@ namespace esphome
         };
       };
 
+      void publish_blade_swing_switches()
+      {
+        if (blade_swing_door != nullptr)
+          blade_swing_door->publish_state((blade_swing_mask_state & 0x01) != 0);
+      
+        if (blade_swing_kitchen != nullptr)
+          blade_swing_kitchen->publish_state((blade_swing_mask_state & 0x02) != 0);
+      
+        if (blade_swing_hallway != nullptr)
+          blade_swing_hallway->publish_state((blade_swing_mask_state & 0x04) != 0);
+      
+        if (blade_swing_livingroom != nullptr)
+          blade_swing_livingroom->publish_state((blade_swing_mask_state & 0x08) != 0);
+      
+        if (blade_swing_mask != nullptr)
+          blade_swing_mask->publish_state(blade_swing_mask_state);
+      }
+      
+      void update_blade_swing_mask(uint8_t value)
+      {
+        blade_swing_mask_state = value & 0x0F;
+        blade_swing_mask_state_known = true;
+        publish_blade_swing_switches();
+      }
+      
+      void set_blade_swing_bit(uint8_t bit, bool enabled)
+      {
+        uint8_t mask = blade_swing_mask_state_known ? blade_swing_mask_state : 0;
+      
+        if (enabled)
+          mask |= bit;
+        else
+          mask &= ~bit;
+      
+        mask &= 0x0F;
+      
+        ProtocolRequest request;
+        request.blade_swing_mask = mask;
+        publish_request(request);
+      
+        // optimistic update
+        update_blade_swing_mask(mask);
+      }
+
+      void set_blade_swing_door_switch(Samsung_AC_Switch *switch_)
+      {
+        blade_swing_door = switch_;
+        blade_swing_door->write_state_ = [this](bool value)
+        {
+          set_blade_swing_bit(0x01, value);
+        };
+      }
+      
+      void set_blade_swing_kitchen_switch(Samsung_AC_Switch *switch_)
+      {
+        blade_swing_kitchen = switch_;
+        blade_swing_kitchen->write_state_ = [this](bool value)
+        {
+          set_blade_swing_bit(0x02, value);
+        };
+      }
+      
+      void set_blade_swing_hallway_switch(Samsung_AC_Switch *switch_)
+      {
+        blade_swing_hallway = switch_;
+        blade_swing_hallway->write_state_ = [this](bool value)
+        {
+          set_blade_swing_bit(0x04, value);
+        };
+      }
+      
+      void set_blade_swing_livingroom_switch(Samsung_AC_Switch *switch_)
+      {
+        blade_swing_livingroom = switch_;
+        blade_swing_livingroom->write_state_ = [this](bool value)
+        {
+          set_blade_swing_bit(0x08, value);
+        };
+      }
+
       void set_blade_swing_mask_number(Samsung_AC_Number *number)
       {
         blade_swing_mask = number;
@@ -311,13 +397,14 @@ namespace esphome
           if (value > 15)
             value = 15;
       
+          uint8_t mask = static_cast<uint8_t>(value) & 0x0F;
+      
           ProtocolRequest request;
-          request.blade_swing_mask = static_cast<uint8_t>(value);
+          request.blade_swing_mask = mask;
           publish_request(request);
       
-          // optimistic update so HA immediately shows the chosen value
-          if (blade_swing_mask != nullptr)
-            blade_swing_mask->publish_state(static_cast<uint8_t>(value));
+          // optimistic update
+          update_blade_swing_mask(mask);
         };
       };
 
