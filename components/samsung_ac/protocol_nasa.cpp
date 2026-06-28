@@ -863,6 +863,12 @@ namespace esphome
                 target->set_swing_horizontal(source, message.value == 1);
                 break;
             }
+            case MessageNumber::ENUM_in_louver_hl_part_swing:
+            {
+                LOG_MESSAGE(ENUM_in_louver_hl_part_swing, (double)message.value, source, dest);
+                device->update_blade_swing_mask(static_cast<uint8_t>(message.value));
+                break;
+            }
             case MessageNumber::VAR_in_temp_water_tank_f:
             {
                 LOG_MESSAGE(VAR_in_temp_water_tank_f, (double)message.value, source, dest);
