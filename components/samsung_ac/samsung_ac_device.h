@@ -133,6 +133,7 @@ namespace esphome
       Samsung_AC_Number *target_temperature{nullptr};
       Samsung_AC_Number *water_outlet_target{nullptr};
       Samsung_AC_Number *target_water_temperature{nullptr};
+      Samsung_AC_Number *blade_swing_mask{nullptr};
       Samsung_AC_Switch *power{nullptr};
       Samsung_AC_Switch *automatic_cleaning{nullptr};
       Samsung_AC_Switch *water_heater_power{nullptr};
@@ -296,6 +297,27 @@ namespace esphome
           ProtocolRequest request;
           request.target_temp = value;
           publish_request(request);
+        };
+      };
+
+      void set_blade_swing_mask_number(Samsung_AC_Number *number)
+      {
+        blade_swing_mask = number;
+      
+        blade_swing_mask->write_state_ = [this](float value)
+        {
+          if (value < 0)
+            value = 0;
+          if (value > 15)
+            value = 15;
+      
+          ProtocolRequest request;
+          request.blade_swing_mask = static_cast<uint8_t>(value);
+          publish_request(request);
+      
+          // optimistic update so HA immediately shows the chosen value
+          if (blade_swing_mask != nullptr)
+            blade_swing_mask->publish_state(static_cast<uint8_t>(value));
         };
       };
 
