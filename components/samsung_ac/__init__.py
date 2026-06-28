@@ -90,7 +90,13 @@ CONF_DEVICE_OUT_CONTROL_WATTMETER_ALL_UNIT_ACCUM = "outdoor_instantaneous_power"
 CONF_DEVICE_OUT_CONTROL_WATTMETER_1W_1MIN_SUM = "outdoor_cumulative_energy"
 CONF_DEVICE_OUT_SENSOR_CT1 = "outdoor_current"
 CONF_DEVICE_OUT_SENSOR_VOLTAGE = "outdoor_voltage"
+
 CONF_DEVICE_BLADE_SWING_MASK = "blade_swing_mask"
+CONF_DEVICE_BLADE_SWING_DOOR = "blade_swing_door"
+CONF_DEVICE_BLADE_SWING_KITCHEN = "blade_swing_kitchen"
+CONF_DEVICE_BLADE_SWING_HALLWAY = "blade_swing_hallway"
+CONF_DEVICE_BLADE_SWING_LIVINGROOM = "blade_swing_livingroom"
+
 CONF_MAP_AUTO_TO_HEAT_COOL = "map_auto_to_heat_cool"
 CONF_DEBUG_LOG_MESSAGES_ON_CHANGE = "debug_log_messages_on_change"
 CONF_NON_NASA_TX_DELAY_MS = "non_nasa_tx_delay_ms"
@@ -262,6 +268,18 @@ DEVICE_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_DEVICE_AUTOMATIC_CLEANING): switch.switch_schema(
             Samsung_AC_Switch, icon="mdi:broom"
+        ),
+        cv.Optional(CONF_DEVICE_BLADE_SWING_DOOR): switch.switch_schema(
+            Samsung_AC_Switch, icon="mdi:door"
+        ),
+        cv.Optional(CONF_DEVICE_BLADE_SWING_KITCHEN): switch.switch_schema(
+            Samsung_AC_Switch, icon="mdi:silverware-fork-knife"
+        ),
+        cv.Optional(CONF_DEVICE_BLADE_SWING_HALLWAY): switch.switch_schema(
+            Samsung_AC_Switch, icon="mdi:walk"
+        ),
+        cv.Optional(CONF_DEVICE_BLADE_SWING_LIVINGROOM): switch.switch_schema(
+            Samsung_AC_Switch, icon="mdi:sofa"
         ),
         cv.Optional(CONF_DEVICE_WATER_HEATER_POWER): switch.switch_schema(
             Samsung_AC_Switch
@@ -515,6 +533,22 @@ async def to_code(config):
             CONF_DEVICE_OUT_OPERATION_HEATCOOL_TEXT: (
                 text_sensor.new_text_sensor,
                 var_dev.set_outdoor_operation_heatcool_text_sensor,
+            ),
+            CONF_DEVICE_BLADE_SWING_DOOR: (
+                switch.new_switch,
+                var_dev.set_blade_swing_door_switch,
+            ),
+            CONF_DEVICE_BLADE_SWING_KITCHEN: (
+                switch.new_switch,
+                var_dev.set_blade_swing_kitchen_switch,
+            ),
+            CONF_DEVICE_BLADE_SWING_HALLWAY: (
+                switch.new_switch,
+                var_dev.set_blade_swing_hallway_switch,
+            ),
+            CONF_DEVICE_BLADE_SWING_LIVINGROOM: (
+                switch.new_switch,
+                var_dev.set_blade_swing_livingroom_switch,
             ),
         }
 
